@@ -100,25 +100,30 @@ exports.createRatingBook = (req, res, next) => {
     .then((book) => {
       let totalScore = 0;
 
+      console.log(book);
       if (
         book.ratings.find((rating) => rating.userId === req.auth.userId) ===
         undefined
       ) {
         book.ratings.push({ userId: req.auth.userId, grade: req.body.rating });
-        /*book.save();
-        Book.updateOne({ _id: req.params.id })
-          .then({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
-          .catch((error) => res.status(401).json({ error }));*/
+
+        book.ratings.map((rating) => {
+          console.log(totalScore);
+          totalScore = totalScore + rating.grade;
+        });
+        totalScore = totalScore / book.ratings.length;
+        console.log("avg: " + totalScore);
+        book.averageRating = totalScore;
+        console.log("True" + book.averageRating);
+        book
+          .save()
+          .then(() => res.status(200).json(book))
+          .catch((error) => res.status(401).json({ error }));
         console.log(book.ratings);
         console.log(totalScore);
-        res.status(201).json(book);
       } else {
         res.status(403).json(book);
       }
     })
     .catch((error) => res.status(400).json({ error }));
 };
-
-/*.map((rating) => {
-        (totalScore += rating.grade) / (book.ratings.length() + 1);
-      });*/

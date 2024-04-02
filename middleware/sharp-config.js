@@ -4,7 +4,7 @@ module.exports = async (req, res, next) => {
   if (typeof req.file !== "undefined") {
     const { buffer, originalname } = req.file;
     const timestamp = Date.now();
-    req.file.filename = `${originalname}-${timestamp}.webp`;
+    req.file.filename = `${originalname.split(".")[0]}-${timestamp}.webp`;
     await sharp(buffer)
       .webp({ quality: 20 })
       .toFile("./images/" + req.file.filename);

@@ -1,12 +1,14 @@
 const { error, log } = require("console");
 const Book = require("../models/Book");
 const fs = require("fs");
+const { dirname } = require("path");
 
 exports.createBook = (req, res, next) => {
   try {
     const bookObject = JSON.parse(req.body.book);
     delete bookObject._id;
     delete bookObject._userId;
+
     const book = new Book({
       ...bookObject,
       userId: req.auth.userId,
@@ -24,7 +26,7 @@ exports.createBook = (req, res, next) => {
         res.status(400).json({ error });
       });
   } catch (error) {
-    res.status(400).json({ error });
+    //res.status(400).json({ error });
   }
 };
 
@@ -42,16 +44,29 @@ exports.modifyBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId != req.auth.userId) {
-        res.status(401).json({ message: "Non-autorisé" });
+        res.status(403).json({ message: "Non-autorisé" });
       } else {
         const oldfilename = book.imageUrl.split("/images/")[1];
-        if (oldfilename !== undefined && book.filename !== undefined) {
-          fs.unlink(`images/${oldfilename}`, (err) => {
+        if (oldfilename != undefined && bookObject.imageUrl != undefined) {
+          console.log(`${__dirname}/../images/${oldfilename}`);
+
+          fs.unlink(`${__dirname}/../images/${oldfilename}`, (err) => {
             if (err) {
               console.log(err);
             }
           });
         }
+
+        const singleBook = req.body;
+        console.log(req.body);
+        for (const [key, value] of Object.entries(singleBook)) {
+          console.log(`${key}:0000 ${value}`);
+          if (value === "") {
+            throw new Error.json({ message: "Can't be empty" });
+          }
+        }
+
+        console.log(book);
         Book.updateOne(
           { _id: req.params.id },
           { ...bookObject, _id: req.params.id }

@@ -23,6 +23,13 @@ exports.createBook = (req, res, next) => {
         res.status(201).json({ message: "Objet enregistré !" });
       })
       .catch((error) => {
+        if (book.imageUrl != undefined) {
+          fs.unlink(`${__dirname}/../images/${req.file.filename}`, (err) => {
+            if (err) {
+              console.log(err);
+            }
+          });
+        }
         res.status(400).json({ error });
       });
   } catch (error) {
